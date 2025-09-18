@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بوصلة المسارات واللبنات</title>
+
+<!-- PWA Manifest Link -->
+<link rel="manifest" href="manifest.json">
+
+    <!-- PWA Manifest Link -->
+    <link rel="manifest" href="manifest.json">
+
+    <style>
+        :root {
+            --primary-color: #2980b9;
+            --secondary-color: #27ae60;
+            --accent-color: #f39c12;
+            --background-color: #ecf0f1;
+            --card-background: #ffffff;
+            --text-color: #34495e;
+            --header-text-color: #ffffff;
+            --border-color: #bdc3c7;
+            --shadow-color: rgba(44, 62, 80, 0.1);
+            --success-color: #2ecc71;
+            --success-bg-color: #eafaf1;
+            --incomplete-color: #3498db;
+            --incomplete-bg-color: #eaf5fc;
+            --pending-color: #e67e22;
+            --pending-bg-color: #fef5e7;
+            --font-family: 'Tajawal', sans-serif;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.7;
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--card-background);
+            border-radius: 15px;
+            box-shadow: 0 10px 40px var(--shadow-color);
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            color: var(--header-text-color);
+            padding: 25px 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        header h1 { margin: 0; font-size: 2em; font-weight: 700; }
+        .app-logo { max-width: 100px; margin-bottom: 10px; }
+
+        .header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .header-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid white;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+        }
+        .header-btn:hover { background: rgba(255,255,255,0.4); }
+
+        .settings-toggle-btn {
+            background: none;
+            border: 1px solid transparent;
+            color: var(--text-color);
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #f8f9fa;
+        }
+        .settings-toggle-btn:hover { background-color: #e9ecef; }
+        .settings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+
+        .tabs-container { border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); }
+        .tabs-nav { display: flex; background-color: #f8f9fa; flex-wrap: wrap; }
+        .tab-btn {
+            padding: 15px 20px;
+            cursor: pointer;
+            border: none;
+            background-color: transparent;
+            font-size: 1.1em;
+            font-weight: 500;
+            color: var(--primary-color);
+            transition: all 0.3s ease;
+            flex-grow: 1;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-btn.active { color: var(--primary-color); font-weight: 700; border-color: var(--primary-color); background: white;}
+        .tab-content { padding: 25px; border-top: 1px solid var(--border-color); display: none; background: white; }
+        .tab-content.active { display: block; }
+        
+        h3.section-title { font-weight: 700; color: var(--primary-color); margin-top: 0; border-bottom: 2px solid var(--secondary-color); padding-bottom: 10px; }
+        
+        .class-selection-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-bottom: 20px; }
+        .class-checkbox-item { display: flex; align-items: center; gap: 8px; background-color: #f8f9fa; padding: 10px; border-radius: 5px; }
+
+        .responsive-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 15px; }
+        
+        .assignments-container {
+            display: flex;
+            gap: 15px;
+            min-height: 120px;
+        }
+        .assignment-column {
+            flex: 0 0 180px;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .assignment-column h5 {
+            margin: 0;
+            font-size: 1.1em;
+            text-align: center;
+            color: var(--primary-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .save-btn-container { margin-top:20px; display: flex; justify-content: space-between; align-items: center; }
+        button.save-btn {
+            background: linear-gradient(45deg, var(--success-color), #27ae60);
+            color: var(--header-text-color);
+            border: none;
+            font-weight: bold;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        button:hover { filter: brightness(1.1); box-shadow: 0 4px 15px rgba(0,0,0,0.1); transform: translateY(-2px); }
+
+        .info-message { padding: 20px; margin: 20px 0; background-color: #eafaf1; border-right: 5px solid var(--secondary-color); border-radius: 8px; color: var(--secondary-color); text-align: center; font-size: 1.2em; font-weight: 500; }
+        .hidden { display: none; }
+        
+        .status-toggle { cursor: pointer; font-weight: bold; padding: 5px 10px; border-radius: 5px; user-select: none; transition: all 0.3s; text-align: center; }
+        .status-toggle.done { color: var(--success-color); background-color: var(--success-bg-color); }
+        .status-toggle.incomplete { color: var(--incomplete-color); background-color: var(--incomplete-bg-color); }
+        .status-toggle.pending { color: var(--pending-color); background-color: var(--pending-bg-color); }
+
+        .control-group { display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; }
+        .control-group > div { flex: 1 1 200px; }
+        label { display: block; margin-bottom: 8px; font-weight: 500; color: #555; }
+        select, input[type="date"] { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background-color: var(--card-background); font-size: 1em; box-sizing: border-box; }
+        
+        #content-display .week-grid { display: grid; grid-template-columns: 1fr; gap: 25px; }
+        #content-display .week-card { background-color: var(--card-background); border-radius: 12px; box-shadow: 0 6px 20px var(--shadow-color); overflow: hidden; }
+        #content-display .week-card-header { background-color: var(--primary-color); color: var(--header-text-color); padding: 15px 20px; font-size: 1.3em; font-weight: 700;}
+        #content-display .session-grid { display: grid; grid-template-columns: 1fr; gap: 15px; padding: 20px; }
+        #content-display .session-card { border: 1px solid var(--border-color); border-radius: 8px; margin: 0; display: flex; flex-direction: column; }
+        #content-display .session-card-header { background-color: #f8f9fa; padding: 10px 15px; font-weight: bold; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; border-bottom: 1px solid var(--border-color); }
+        #content-display .lesson-content { padding: 15px; flex-grow: 1; }
+        #content-display .session-card.pending { /* default state */ }
+        #content-display .session-card.incomplete { background-color: var(--incomplete-bg-color); border-color: var(--incomplete-color); }
+        #content-display .session-card.done { background-color: var(--success-bg-color); border-color: var(--success-color); }
+        #content-display .completion-date-container { display: flex; align-items: center; gap: 5px; font-weight: normal; font-size: 0.9em;}
+        
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
+        .modal.show { display: flex; }
+        .modal-content { background-color: var(--card-background); margin: auto; padding: 25px; border-radius: 10px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); width: 90%; max-width: 800px; max-height: 90vh; display: flex; flex-direction: column; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px; }
+        .modal-header h4 { margin: 0; color: var(--primary-color); font-size: 1.3em; }
+        .close-btn { color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .modal-body { overflow-y: auto; }
+        .modal-body ul { padding-right: 20px; } .modal-body li { margin-bottom: 10px; }
+        .modal-footer { margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border-color); text-align: left; }
+
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: var(--primary-color); color: white; padding: 15px 30px; border-radius: 8px; opacity: 0; visibility: hidden; transition: all 0.5s; z-index: 1003; }
+        .toast.show { opacity: 1; visibility: visible; transform: translate(-50%, -10px); }
+
+        .app-footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border-color); font-size: 0.9em; color: #7f8c8d; }
+
+        /* Floating Action Bar */
+        .floating-bar {
+            position: fixed;
+            top: 120px;
+            left: 0;
+            transform: translateX(-100%);
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 0 10px 10px 0;
+            padding: 15px;
+            box-shadow: 0 4px 15px var(--shadow-color);
+            z-index: 999;
+            transition: transform 0.4s ease-in-out;
+            display: flex;
+            align-items: center;
+        }
+        .floating-bar.visible {
+            transform: translateX(0);
+        }
+        .floating-bar-content { text-align: center; }
+        .floating-bar-content h6, .floating-bar-content p { margin: 0 0 8px 0; font-weight: bold; }
+        .floating-bar-content p { font-weight: normal; font-size: 0.9em; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
+        .floating-bar-links { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+        .floating-bar-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 8px;
+            border-radius: 5px;
+            color: var(--primary-color);
+            background-color: #f0f0f0;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+        .floating-bar-links a:hover { background-color: #e0e0e0; }
+        .toggle-floating-bar {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            padding: 10px 5px;
+            border: none;
+            background-color: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            border-radius: 5px 0 0 5px;
+            font-weight: bold;
+        }
+        
+        /* Textbook (Journal) Table */
+        #journal-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        #journal-table th, #journal-table td { 
+            border: 1px solid var(--border-color); 
+            padding: 12px; 
+            text-align: center; 
+            vertical-align: middle;
+        }
+        #journal-table th { background-color: #f8f9fa; font-weight: 700; }
+        #journal-table .lesson-topic-cell { width: 45%; }
+        #journal-table .lesson-title { color: red; font-weight: bold; }
+        #journal-table .lesson-meta { font-size: 0.85em; color: #555; }
+        #journal-table .note-text {
+            white-space: pre-wrap;
+            word-break: break-word; /* Ensure long words wrap */
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+        .meta-value {
+            color: var(--secondary-color);
+            font-weight: bold;
+        }
+        .edit-note-btn { background: none; border: none; cursor: pointer; font-size: 1.2em; color: var(--primary-color); }
+
+        /* Notes Modal */
+        #note-modal-content textarea { width: 100%; min-height: 150px; padding: 10px; font-family: inherit; border-radius: 8px; border: 1px solid var(--border-color); }
+
+        .print-title { display: none; }
+
+        @media (min-width: 768px) {
+            #content-display .session-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (min-width: 1100px) {
+            #content-display .session-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+        
+        @media print {
+            body, .container {
+                box-shadow: none; margin: 0; padding: 0; background: none;
+            }
+            body > *:not(#journal-modal) { 
+                display: none; 
+            }
+            #journal-modal, #journal-modal .modal-content {
+                display: block; position: static; width: 100%; max-width: 100%;
+                max-height: none; height: auto; box-shadow: none;
+                border: none; padding: 0; margin: 0;
+            }
+            .modal-header, .modal-footer, .edit-note-btn { 
+                display: none; 
+            }
+            .modal-body {
+                overflow: visible !important;
+                overflow-x: hidden !important;
+            }
+            .print-title {
+                display: block; text-align: center; font-size: 1.5em;
+                color: #000; margin-bottom: 20px;
+            }
+            #journal-table, #journal-table th, #journal-table td {
+                box-sizing: border-box; 
+            }
+            #journal-table { 
+                font-size: 11px;
+                width: 100%;
+                table-layout: fixed;
+                border-collapse: collapse;
+            }
+            #journal-table th:nth-child(1), #journal-table td:nth-child(1) { width: 15%; } /* القسم */
+            #journal-table th:nth-child(2), #journal-table td:nth-child(2) { width: 45%; } /* موضوع الدرس */
+            #journal-table th:nth-child(3), #journal-table td:nth-child(3) { width: 12%; } /* تاريخ الإنجاز */
+            #journal-table th:nth-child(4), #journal-table td:nth-child(4) { width: 28%; } /* ملاحظات */
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-controls">
+                <button id="journal-btn" class="header-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783z"/>
+                    </svg>
+                    <span>دفتر النصوص</span>
+                </button>
+                <button class="instructions-btn header-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 0 0 .241.247zm2.325 5.422c.534 0 .813-.246.813-.816 0-.534-.279-.816-.813-.816-.534 0-.813.279-.813.816 0 .57.279.816.813.816z"/>
+                    </svg>
+                    <span>تعليمات الاستخدام</span>
+                </button>
+            </div>
+            <img src="https://i.ibb.co/Z1m0hrnC/icon-512x512.png" alt="شعار التطبيق" class="app-logo">
+            <h1>بوصلة المسارات واللبنات</h1>
+        </header>
+
+        <div id="teacher-settings-container">
+            <div class="settings-header">
+                <h3>إعدادات الأستاذ</h3>
+                <button class="settings-toggle-btn">
+                    <span class="btn-text">إخفاء الإعدادات</span>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z" transform="rotate(180 8 8)"></path></svg>
+                </button>
+            </div>
+            <div class="settings-content">
+                <div class="tabs-container">
+                    <nav class="tabs-nav" id="settings-tabs-nav"></nav>
+                    <div id="settings-tabs-content"></div>
+                </div>
+                 <div class="save-btn-container">
+                    <button id="save-teacher-settings" class="save-btn">حفظ كل الإعدادات</button>
+                    <button class="settings-toggle-btn">
+                        <span class="btn-text">إخفاء الإعدادات</span>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z" transform="rotate(180 8 8)"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="post-settings-message" class="info-message hidden"></div>
+        <div id="main-content-container" class="hidden"></div>
+        
+        <footer class="app-footer">
+            <p>© Copyright 2025 Riyapp - All rights reserved.</p>
+            <p>Designed with ❤️ by Rachid Outgadirt</p>
+        </footer>
+    </div>
+
+    <!-- Floating Action Bar -->
+    <div id="floating-bar" class="floating-bar">
+        <button id="toggle-floating-bar" class="toggle-floating-bar">إخفاء</button>
+        <div id="floating-bar-content" class="floating-bar-content"></div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <!-- Modals -->
+    <div id="instructions-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4>تعليمات استخدام التطبيق</h4>
+                <span class="close-btn">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>مرحباً بك في تطبيق "بوصلة المسارات واللبنات"! هذا الدليل سيساعدك على الاستفادة من كل ميزات التطبيق:</p>
+                <ul>
+                    <li><strong>الخطوة الأولى: إعدادات الأستاذ</strong>
+                        <ul>
+                            <li>افتح تبويب المستوى الدراسي الذي تدرّسه (الأولى, الثانية, أو الثالثة إعدادي).</li>
+                            <li><strong>حدد الأقسام:</strong> قم باختيار كل الأقسام المسندة إليك.</li>
+                            <li><strong>خصص اللبنة:</strong> لكل قسم يظهر أمامك, اختر "اللبنة" المناسبة له من القائمة المنسدلة أسفله.</li>
+                            <li><strong>حفظ الإعدادات:</strong> بعد الانتهاء، انقر على زر "حفظ كل الإعدادات".</li>
+                        </ul>
+                    </li>
+                    <li><strong>الخطوة الثانية: استعراض وتتبع الحصص</strong>
+                        <ul>
+                            <li>بعد الحفظ, سيظهر لك عرض المحتوى مباشرة.</li>
+                            <li>استخدم الفلاتر في الأعلى لاختيار القسم، والأسبوع، أو حصة معينة.</li>
+                            <li><strong>تغيير حالة الحصة:</strong> انقر على حالة الحصة لتغييرها. الحالات تتغير بالترتيب التالي: <strong>غير منجزة > غير مكتملة > منجزة</strong>.</li>
+                            <li>عند اختيار "منجزة"، سيظهر حقل لاختيار تاريخ الإنجاز.</li>
+                        </ul>
+                    </li>
+                     <li><strong>الخطوة الثالثة: دفتر النصوص</strong>
+                        <ul>
+                            <li>انقر على زر "دفتر النصوص" في الأعلى لعرض كل الحصص المنجزة.</li>
+                            <li>يمكنك إضافة ملاحظات لكل حصة منجزة وطباعة الدفتر أو حفظه كملف PDF.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div id="journal-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4>دفتر النصوص</h4>
+                <span class="close-btn">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="printable-area">
+                    <h2 class="print-title">دفتر النصوص</h2>
+                    <table id="journal-table">
+                        <thead>
+                            <tr>
+                                <th>القسم</th>
+                                <th class="lesson-topic-cell">موضوع الدرس</th>
+                                <th>تاريخ الإنجاز</th>
+                                <th>ملاحظات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="journal-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="print-journal-btn" class="save-btn">تحميل PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="note-modal" class="modal">
+        <div id="note-modal-content" class="modal-content">
+            <div class="modal-header">
+                <h4>إضافة / تعديل ملاحظة</h4>
+                <span class="close-btn">&times;</span>
+            </div>
+            <div class="modal-body">
+                <textarea id="note-textarea" placeholder="اكتب ملاحظاتك هنا..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button id="save-note-btn" class="save-btn">حفظ الملاحظة</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const data = { '1': { name: 'الأولى إعدادي', units: ['اللبنة 1', 'اللبنة 2', 'اللبنة 3', 'اللبنة 4', 'اللبنة 5'], paths: { '1': { name: "المسار الأول", weeks: [{ name: "الأسبوع الأول", sessions: ["أقرأ بطلاقة وأفهم جملا سردية, ص.7.", "أقرأ بطلاقة وأفهم جملا وصفية لمشهد طبيعي, ص .8.", "أستمع وأفهم جملا سردية من حكاية متخيلة, ص.9.", "أنجز نشاطا توليفيا, ص.10."] }, { name: "الأسبوع الثاني", sessions: ["أقرأ بطلاقة وأفهم جملا تفسيرية حول ظاهرة اجتماعية, ص. 13.", "أقرأ بطلاقة وأفهم جملا حجاجية في التعبير عن الرأي, ص.14.", "أقرأ بطلاقة وأفهم جملا تفسيرية لحدث, ص. 15.", "أنجز نشاطا توليفيا, ص.16."] }, { name: "الأسبوع الثالث", sessions: ["أقرأ بطلاقة وأفهم, جملا حجاجية في التعبير عن رأي, ص.19.", "أقرأ بطلاقة وأفهم جملا سردية من حكاية عجيبة, ص.20.", "أنجز نشاطا توليفيا للبنة, ص.23.", "اجتياز الرائز لأقوم درجة تحكمي في اللبنة, ص.24."] }, { name: "الأسبوع الرابع", sessions: ["أقرأ بطلاقة وأفهم فقرة سردية من حكاية متخيلة, ص. 29.", "أقرأ بطلاقة وأفهم فقرة وصفية لمشهد طبيعي, ص.30.", "أستمع وأفهم حكاية مثل, ص.31.", "أنجز نشاطا توليفيا, ص. 32."] }, { name: "الأسبوع الخامس", sessions: ["أقرأ بطلاقة وأفهم فقرة تفسيرية عن ظاهرة طبيعية, ص.35.", "أقرأ بطلاقة وأفهم فقرة حجاجية في التعبير عن رأي, ص.36.", "أقرأ بطلاقة وأفهم فقرة حجاجية في الدفاع عن فكرة, ص.37.", "أنجز نشاطا توليفيا, ص. 38."] }] }, '2': { name: "المسار الثاني", weeks: [{ name: "الأسبوع الأول", sessions: ["أقرأ بطلاقة وأفهم فقرة سردية من حكاية متخيلة, ص.29.", "أقرأ بطلاقة وأفهم فقرة وصفية لمشهد طبيعي, ص. 30.", "أستمع وأفهم حكاية مثل, ص.31.", "أنجز نشاطا توليفيا, ص. 32."] }, { name: "الأسبوع الثاني", sessions: ["أقرأ بطلاقة وأفهم فقرة تفسيرية عن ظاهرة طبيعية, ص.35.", "أقرأ بطلاقة وأفهم فقرة حجاجية في التعبير عن رأي, ص.36.", "أقرأ بطلاقة وأفهم فقرة حجاجية في الدفاع عن فكرة, ص.37.", "أنجز نشاطا توليفيا, ص. 38."] }, { name: "الأسبوع الثالث", sessions: ["أقرأ بطلاقة وأفهم فقرة عن حكاية عجيبة, ص.41.", "أقرأ بطلاقة وأفهم فقرة حجاجية في التعبير عن موقف, ص. 42.", "أنجز نشاطا توليفيا للبنة, ص. 45 و 46.", "اجتياز الرائز لأقوم درجة تحكمي في اللبنة, ص. 47 - 48."] }, { name: "الأسبوع الرابع", sessions: ["أقرأ بطلاقة وأفهم نصا سرديا عن حكاية متخيلة, ص.52.", "أقرأ بطلاقة وأفهم نصا في وصف مكان, ص.53.", "أستمع وأفهم نصا سرديا من حكاية عجيبة, ص.54.", "أنجز نشاطا توليفيا, ص.55."] }, { name: "الأسبوع الخامس", sessions: ["أقرأ بطلاقة وأفهم نصا تفسيريا حول ظاهرة اجتماعية, ص. 58.", "أقرأ بطلاقة وأفهم نصا حجاجيا في الدفاع عن موقف, ص. 59.", "أقرأ بطلاقة وأفهم نصا تفسيريا عن حدث ثقافي, ص.60.", "أنجز نشاطا توليفيا, ص.61."] }] }, '3': { name: "المسار الثالث", weeks: [{ name: "الأسبوع الأول", sessions: ["أقرأ بطلاقة وأفهم نصا سرديا عن حكاية متخيلة, ص.52.", "أقرأ بطلاقة وأفهم نصا في وصف مكان, ص.53.", "أستمع وأفهم نصا سرديا من حكاية عجيبة, ص.54.", "أنجز نشاطا توليفيا, ص.55."] }, { name: "الأسبوع الثاني", sessions: ["أقرأ بطلاقة وأفهم نصا تفسيريا حول ظاهرة اجتماعية, ص. 58.", "أقرأ بطلاقة وأفهم نصا حجاجيا في الدفاع عن موقف, ص.59.", "أقرأ بطلاقة وأفهم نصا تفسيريا عن حدث ثقافي, ص.60.", "أنجز نشاطا توليف, ص.61."] }, { name: "الأسبوع الثالث", sessions: ["أقرأ بطلاقة وأفهم نصا وصفيا في وصف الشخوص, ص. 64.", "أقرأ بطلاقة وأفهم نصا حجاجيا في التعقيب عن رأي, ص.65.", "أنجز نشاطا توليفيا للبنة, ص 68-69.", "اجتياز الرائز لأقوم درجة تحكمي في اللبنة, ص. 70-71."] }, { name: "الأسبوع الرابع", sessions: ["أقرأ بطلاقة وأفهم نصا سرديا لقصة مثل, ص.75.", "أقرأ بطلاقة وأفهم نصا وصفيا في وصف المشاعر, ص.76.", "أستمع وأفهم نصا سرديا عن حكاية واقعية, ص.77.", "أنجز نشاطا توليفيا, ص. 78."] }, { name: "الأسبوع الخامس", sessions: ["أقرأ بطلاقة وأفهم نصا تفسيريا لظاهرة اجتماعية, ص.81.", "أقرأ بطلاقة وأفهم نصا حجاجيا في التعقيب عن رأي, ص.82.", "أقرأ بطلاقة وأفهم نصا تفسيريا عن حدث ثقافي, ص.83.", "أنجز نشاطا توليفيا, ص.84."] }] }, '4': { name: "المسار الرابع", weeks: [{ name: "الأسبوع الأول", sessions: ["أقرأ بطلاقة وأفهم نصا سرديا لقصة مثل, ص.75.", "أقرأ بطلاقة وأفهم نصا وصفيا في وصف المشاعر, ص.76.", "أستمع وأفهم نصا سرديا عن حكاية واقعية, ص.77.", "أنجز نشاطا توليفيا, ص. 78."] }, { name: "الأسبوع الثاني", sessions: ["أقرأ بطلاقة وأفهم نصا تفسيريا لظاهرة اجتماعية, ص.81.", "أقرأ بطلاقة وأفهم نصا حجاجيا في التعقيب عن رأي, ص.82.", "أقرأ بطلاقة وأفهم نصا تفسيريا عن حدث ثقافي, ص.83.", "أنجز نشاطا توليفيا, ص.84."] }, { name: "الأسبوع الثالث", sessions: ["أقرأ بطلاقة وأفهم نصا حجاجيا في التعبير عن موقف, ص.87.", "أقرأ بطلاقة وأفهم نصا سرديا حول قصة متخيلة, ص.88.", "أنجز نشاطا توليفيا للبنة, ص.91 و92.", "اجتياز الرائز لأقوم درجة تحكمي في اللبنة, ص. 93 و94."] }, { name: "الأسبوع الرابع", sessions: ["أقرأ بطلاقة وأفهم نصا سرديا في السيرة الغيرية, ص. 98.", "أقرأ بطلاقة وأفهم نصا في وصف الشخوص والمشاعر, ص. 100.", "أستمع وأفهم نصا تفسيريا لحدث علمي, ص.102.", "أنجز نشاطا توليفيا, ص. 103-104."] }, { name: "الأسبوع الخامس", sessions: ["أقرأ بطلاقة وأفهم نصا حجاجيا عن ظاهرة فكرية, ص.109 و110.", "أقرأ بطلاقة وأفهم نصا حجاجيا في الدفاع عن موقف, ص. 111 و112.", "أقرأ بطلاقة وأفهم نصا سرديا عن السيرة الذاتية, ص.113-114.", "أنجز نشاطا توليفيا للبنة, ص.118."] }] } } }, '2': { name: 'الثانية إعدادي', units: ['اللبنة 1', 'اللبنة 2', 'اللبنة 3', 'اللبنة 4', 'اللبنة 5'], paths: { '1': { name: "المسار الأول", weeks: [{ name: "الأسبوع الأول", sessions: ["أقرأ بطلاقة وأفهم, جملا سردية, ص.6.", "أقرأ بطلاقة وأفهم جملا وصفية لمشهد طبيعي, ص .7.", "أستمع وأفهم جملا سردية, ص.8.", "أنجز نشاطا توليفيا, ص.9."] }, { name: "الأسبوع الثاني", sessions: ["أقرأ بطلاقة وأفهم, جملا تفسيرية حول ظاهرة اجتماعية, ص.12.", "أقرأ بطلاقة وأفهم جملا حجاجية في التعبير عن الرأي, ص.13.", "أقرأ بطلاقة وأفهم جملا تفسيرية لحدث واقعي, ص.14.", "أنجز نشاطا توليفيا, ص.15."] }, { name: "الأسبوع الثالث", sessions: ["أقرأ بطلاقة وأفهم جملا حجاجية في التعبير عن رأي, ص.18.", "أقرأ بطلاقة وأفهم جملا سردية في حكاية عجيبة, ص.19.", "أنجز نشاطا توليفيا للبنة, ص.22.", "اجتياز الرائز لأقوم درجة تحكمي في اللبنة, ص. 23-24."] }, { name: "الأسبوع الرابع", sessions: ["أقرأ بطلاقة وأفهم فقرة سردية من حكاية متخيلة, ص. 26.", "أقرأ بطلاقة وأفهم فقرة وصفية لمشهد طبيعي, ص.27.", "أستمع وأفهم حكاية مثل, ص.28.", "أنجز نشاطا توليفيا, ص. 29."] }] }, '2': { name: "المسار الثاني", weeks: [{ name: "الأسبوع الأول", sessions: ["أقرأ بطلاقة وأفهم فقرة سردية من حكاية متخيلة, ص. 26.", "أقرأ بطلاقة وأفهم فقرة وصفية لمشهد طبيعي, ص.27.", "أستمع وأفهم حكاية مثل, ص.28.", "أنجز نشاطا توليفيا, ص. 29."] }, { name: "الأسبوع الثاني", sessions: ["أقرأ بطلاقة وأفهم فقرة تفسيرية عن ظاهرة طبيعية, ص. 32.", "أقرأ بطلاقة وأفهم فقرة حجاجية في التعبير عن رأي, ص.33.", "أنجز نشاطا توليفيا للبنة, ص. 36-37.", "اجتياز الرائز لأقوم درجة تحكمي في اللبنة, ص. 38-39."] }, { name: "الأسبوع الثالث", sessions: ["أقرأ بطلاقة وأفهم نصا سرديا عن حكاية متخيلة, ص. 41.", "أقرأ بطلاقة وأفهم نصا في وصف مكان, ص.42.", "أستمع وأفهم نصا سرديا لحكاية عجيبة, ص.43.", "أنجز نشاطا توليفيا, ص.44."] }, { name: "الأسبوع الرابع", sessions: ["أقرأ بطلاقة وأفهم تفسيريا حول ظاهرة اجتماعية, ص.47.", "أقرأ بطلاقة وأفهم نصا حجاجيا في الدفاع عن موقف, ص.48.", "أنجز نشاطا توليفيا للبنة, ص. 51-52.", "اجتياز الرائز لأقوم درجة تحكمي في اللبنة, ص. 53-54."] }] }, '3': { name: "المسار الثالث", weeks: [{ name: "الأسبوع الأول", sessions: ["أقرأ بطلاقة وأفهم نصا سرديا عن حكاية متخيلة, ص. 41.", "أقرأ بطلاقة وأفهم نصا في وصف مكان, ص.42.", "أستمع وأفهم نصا سرديا لحكاية عجيبة, ص.43.", "أنجز نشاطا توليفيا, ص.44."] }, { name: "الأسبوع الثاني", sessions: ["أقرأ بطلاقة وأفهم تفسيريا حول ظاهرة اجتماعية, ص.47.", "أقرأ بطلاقة وأفهم نصا حجاجيا في الدفاع عن موقف, ص.48.", "أنجز نشاطا توليفيا للبنة, ص. 51-52.", "اجتياز الرائز لأقوم درجة تحكمي في اللبنة, ص. 53-54."] }, { name: "الأسبوع الثالث", sessions: ["أقرأ بطلاقة وأفهم نصا سرديا لقصة مثل, ص.56.", "أقرأ وأفهم نصا وصفيا في وصف المشاعر, ص.57.", "أستمع وأفهم نصا سرديا لحكاية واقعية, ص.58.", "أنجز نشاطا توليفيا, ص.59."] }, { name: "الأسبوع الرابع", sessions: ["أقرأ بطلاقة وأفهم نصا تفسيريا لظاهرة اجتماعية, ص.62.", "أقرأ بطلاقة وأفهم نصا حجاجيا في التعقيب عن رأي, ص.63.", "أنجز نشاطا توليفيا للبنة, ص.66-67.", "اجتياز الرائز لأقوم درجة تحكمي في اللبنة, ص. 68-69."] }] }, '4': { name: "المسار الرابع", weeks: [{ name: "الأسبوع الأول", sessions: ["أقرأ بطلاقة وأفهم نصا سرديا لقصة مثل, ص.56.", "أقرأ وأفهم نصا وصفيا في وصف المشاعر, ص.57.", "أستمع وأفهم نصا سرديا لحكاية واقعية, ص.58.", "أنجز نشاطا توليفيا, ص.59."] }, { name: "الأسبوع الثاني", sessions: ["أقرأ بطلاقة وأفهم نصا تفسيريا لظاهرة اجتماعية, ص.62.", "أقرأ بطلاقة وأفهم نصا حجاجيا في التعقيب عن رأي, ص.63.", "أنجز نشاطا توليفيا للبنة, ص.66-67.", "اجتياز الرائز لأقوم درجة تحكمي في اللبنة, ص. 68-69."] }, { name: "الأسبوع الثالث", sessions: ["أقرأ بطلاقة وأفهم نصا سرديا في السيرة الذاتية, ص. 71.", "أقرأ بطلاقة وأفهم نصا في وصف الشخوص والمشاعر, ص. 72.", "أنجز نشاطا توليفيا, ص.73.", "أقرأ بطلاقة وأفهم نصا حجاجيا عن ظاهرة فكرية, ص.76."] }, { name: "الأسبوع الرابع", sessions: ["أقرأ بطلاقة وأفهم نصا سرديا عن السيرة الذاتية, ص.77.", "أنجز نشاطا توليفيا للبنة, ص 79.", "أنجز نشاطا توليفيا للبنة, ص 80.", "نشاط ختامي."] }] } } }, '3': { name: 'الثالثة إعدادي', units: ['اللبنة 1', 'اللبنة 2', 'اللبنة 3', 'اللبنة 4', 'اللبنة 5'], paths: { '1': { name: "المسار الأول", weeks: [{ name: "الأسبوع الأول", sessions: ["أقرأ بطلاقة وأفهم, جملا سردية, ص.6.", "أقرأ بطلاقة وأفهم جملا وصفية لمشهد طبيعي, ص.7.", "أستمع وأفهم جملا سردية من حكاية متخيلة, ص.8.", "أنجز نشاطا توليفيا, ص.9."] }, { name: "الأسبوع الثاني", sessions: ["أقرأ بطلاقة وأفهم, جملا تفسيرية حول ظاهرة اجتماعية, ص.12.", "أقرأ بطلاقة وأفهم جملا حجاجية في التعبير عن الرأي, ص.13.", "أقرأ بطلاقة وأفهم جملا تفسيرية لحدث واقعي, ص.14.", "أنجز نشاطا توليفيا, ص.15."] }, { name: "الأسبوع الثالث", sessions: ["أقرأ بطلاقة وأفهم جملا حجاجية في التعبير عن رأي, ص.18.", "أقرأ بطلاقة وأفهم جملا سردية في حكاية عجيبة, ص.19.", "أنجز نشاطا توليفيا للبنة, ص.22.", "اجتياز الرائز لأقوم درجة تحكمي في اللبنة, ص. 23-24."] }, { name: "الأسبوع الرابع", sessions: ["أقرأ بطلاقة وأفهم فقرة سردية من حكاية متخيلة, ص. 26.", "أقرأ بطلاقة وأفهم فقرة وصفية لمشهد طبيعي, ص.27.", "أستمع وأفهم حكاية مثل, ص.28.", "أنجز نشاطا توليفيا, ص. 29."] }] }, '2': { name: "المسار الثاني", weeks: [{ name: "الأسبوع الأول", sessions: ["أقرأ بطلاقة وأفهم فقرة سردية من حكاية متخيلة, ص. 26.", "أقرأ بطلاقة وأفهم فقرة وصفية لمشهد طبيعي, ص.27.", "أستمع وأفهم حكاية مثل, ص.28.", "أنجز نشاطا توليفيا, ص. 29."] }, { name: "الأسبوع الثاني", sessions: ["أقرأ بطلاقة وأفهم فقرة تفسيرية عن ظاهرة طبيعية, ص. 32.", "أقرأ بطلاقة وأفهم فقرة حجاجية في التعبير عن رأي, ص.33.", "أنجز نشاطا توليفيا للبنة, ص. 36-37.", "اجتياز الرائز لأقوم درجة تحكمي في اللبنة, ص. 38-39."] }, { name: "الأسبوع الثالث", sessions: ["أقرأ بطلاقة وأفهم نصا سرديا عن حكاية متخيلة, ص. 41.", "أقرأ بطلاقة وأفهم نصا في وصف مكان, ص.42.", "أستمع وأفهم نصا سرديا لحكاية عجيبة, ص.43.", "أنجز نشاطا توليفيا, ص.44."] }, { name: "الأسبوع الرابع", sessions: ["أقرأ بطلاقة وأفهم تفسيريا حول ظاهرة اجتماعية, ص.47.", "أقرأ بطلاقة وأفهم نصا حجاجيا في الدفاع عن موقف, ص. 48.", "أنجز نشاطا توليفيا للبنة, ص. 51-52.", "اجتياز الرائز لأقوم درجة تحكمي في اللبنة, ص. 53-54."] }] }, '3': { name: "المسار الثالث", weeks: [{ name: "الأسبوع الأول", sessions: ["أقرأ بطلاقة وأفهم نصا سرديا عن حكاية متخيلة, ص. 41.", "أقرأ بطلاقة وأفهم نصا في وصف مكان, ص.42.", "أستمع وأفهم نصا سرديا لحكاية عجيبة, ص.43.", "أنجز نشاطا توليفيا, ص.44."] }, { name: "الأسبوع الثاني", sessions: ["أقرأ بطلاقة وأفهم تفسيريا حول ظاهرة اجتماعية, ص. 47.", "أقرأ بطلاقة وأفهم نصا حجاجيا في الدفاع عن موقف, ص. 48.", "أنجز نشاطا توليفيا للبنة, ص. 51-52.", "اجتياز الرائز لأقوم درجة تحكمي في اللبنة, ص. 53-54."] }, { name: "الأسبوع الثالث", sessions: ["أقرأ بطلاقة وأفهم نصا سرديا لقصة مثل, ص.56.", "أقرأ وأفهم نصا وصفيا في وصف المشاعر, ص.57.", "أستمع وأفهم نصا سرديا لحكاية واقعية, ص.58.", "أنجز نشاطا توليفيا, ص.59."] }, { name: "الأسبوع الرابع", sessions: ["أقرأ بطلاقة وأفهم نصا تفسيريا لظاهرة اجتماعية, ص.62.", "أقرأ بطلاقة وأفهم نصا حجاجيا في التعقيب عن رأي, ص.63.", "أنجز نشاطا توليفيا للبنة, ص.66-67.", "اجتياز الرائز لأقوم درجة تحكمي في اللبنة, ص. 68-69."] }] }, '4': { name: "المسار الرابع", weeks: [{ name: "الأسبوع الأول", sessions: ["أقرأ بطلاقة وأفهم نصا سرديا لقصة مثل, ص.56.", "أقرأ وأفهم نصا وصفيا في وصف المشاعر, ص.57.", "أستمع وأفهم نصا سرديا لحكاية واقعية, ص.58.", "أنجز نشاطا توليفيا, ص.59."] }, { name: "الأسبوع الثاني", sessions: ["أقرأ بطلاقة وأفهم نصا تفسيريا لظاهرة اجتماعية, ص.62.", "أقرأ بطلاقة وأفهم نصا حجاجيا في التعقيب عن رأي, ص.63.", "أنجز نشاطا توليفيا للبنة, ص.66-67.", "اجتياز الرائز لأقوم درجة تحكمي في اللبنة, ص. 68-69."] }, { name: "الأسبوع الثالث", sessions: ["أقرأ بطلاقة وأفهم نصا سرديا في السيرة الذاتية, ص. 71.", "أقرأ بطلاقة وأفهم نصا في وصف الشخوص والمشاعر, ص. 72.", "أنجز نشاطا توليفيا, ص.73.", "أقرأ بطلاقة وأفهم نصا حجاجيا عن ظاهرة فكرية, ص.76."] }, { name: "الأسبوع الرابع", sessions: ["أقرأ بطلاقة وأفهم نصا سرديا عن السيرة الذاتية, ص.77.", "أنجز نشاطا توليفيا للبنة, ص 79.", "أنجز نشاطا توليفيا للبنة, ص 80.", "نشاط ختامي."] }] } } } };
+
+    const resourceLinks = {
+        '1': { // الأولى إعدادي
+            '1': { path: 'https://drive.google.com/drive/folders/1PA25uD6vcZGvRhkNIp4g4qb5CDl4cdhG', booklet: 'https://drive.google.com/file/d/1aWGPkhCAVO8TPJy0I2aqI6KPP6XcCB1c/view?usp=sharing', audio: 'https://drive.google.com/file/d/1FGqsq70icv2fOrL7FA6ekQCdwORCFo9V/view?usp=sharing' },
+            '2': { path: 'https://drive.google.com/drive/folders/1XIyFZY30ZlelJ81Fwgl-a4SIqmBaJBUN', booklet: 'https://drive.google.com/file/d/1v5vvifoOT_pOyd0qK9UkgwUeg1UikBXy/view?usp=sharing', audio: 'https://drive.google.com/file/d/1FGqsq70icv2fOrL7FA6ekQCdwORCFo9V/view?usp=sharing' },
+            '3': { path: 'https://drive.google.com/drive/folders/1HgEsjqlUZDum_xql0WsnWL593oP8tpNn', booklet: 'https://drive.google.com/file/d/1JoF2IC023chzmfHsDN6_gl0lZy0RrDB2/view?usp=sharing', audio: 'https://drive.google.com/file/d/1FGqsq70icv2fOrL7FA6ekQCdwORCFo9V/view?usp=sharing' },
+            '4': { path: 'https://drive.google.com/drive/folders/1GQG0X2N_kEmWEdoIyrKS5t0lGJWhOtia', booklet: 'https://drive.google.com/file/d/1AGRqldBdMw1OF9EmeIMPu2yvze10kXmO/view?usp=sharing', audio: 'https://drive.google.com/file/d/1FGqsq70icv2fOrL7FA6ekQCdwORCFo9V/view?usp=sharing' }
+        },
+        '2': { // الثانية إعدادي
+            '1': { path: 'https://drive.google.com/drive/folders/1dH0pWLSPWTnvHls1EWvR_kNk_d0gQRSm', booklet: 'https://drive.google.com/file/d/1Qm4bayuzdIs8Dtz5hkqycdmpouYrPVIV/view?usp=sharing', audio: 'https://drive.google.com/file/d/1FGqsq70icv2fOrL7FA6ekQCdwORCFo9V/view?usp=sharing' },
+            '2': { path: 'https://drive.google.com/drive/folders/1D3SJjwe0hWFP5aE7oh0ZwwrgkoM7G-by', booklet: 'https://drive.google.com/file/d/1WNz1QCq4gc595_3p-1G6QmR3SBTzE3gv/view?usp=sharing', audio: 'https://drive.google.com/file/d/1FGqsq70icv2fOrL7FA6ekQCdwORCFo9V/view?usp=sharing' },
+            '3': { path: 'https://drive.google.com/drive/folders/1gLp4LFvrWduF9AxzzKU0D37RA88dhty3', booklet: 'https://drive.google.com/file/d/1AQpIigiLg0OAP0opzJvUfo1RZ4jgRiTb/view?usp=sharing', audio: 'https://drive.google.com/file/d/1FGqsq70icv2fOrL7FA6ekQCdwORCFo9V/view?usp=sharing' },
+            '4': { path: 'https://drive.google.com/drive/folders/1y03XOMsd7xdcuqOtyZ0FH7ZZMhErNsT2', booklet: 'https://drive.google.com/file/d/14SKYTsbFRSilWxf7AOj9-wEza1FUgoNV/view?usp=sharing', audio: 'https://drive.google.com/file/d/1FGqsq70icv2fOrL7FA6ekQCdwORCFo9V/view?usp=sharing' }
+        },
+        '3': { // الثالثة إعدادي
+            '1': { path: 'https://drive.google.com/drive/folders/13pka0l5DNFUGUhRINc1KRMqXCeYd7rFK', booklet: 'https://drive.google.com/file/d/1Wyd1D1UFwrbNSMbU2HK3VN0wfaH2XAfl/view?usp=sharing', audio: 'https://drive.google.com/file/d/1FGqsq70icv2fOrL7FA6ekQCdwORCFo9V/view?usp=sharing' },
+            '2': { path: 'https://drive.google.com/drive/folders/1XlZ-HqAp7NiCmZfEsL5O4X3DeFvxXSrb', booklet: 'https://drive.google.com/file/d/1jgVZK7CiT7dC4_D6hgdmYjH7c88Q6EA7/view?usp=sharing', audio: 'https://drive.google.com/file/d/1FGqsq70icv2fOrL7FA6ekQCdwORCFo9V/view?usp=sharing' },
+            '3': { path: 'https://drive.google.com/drive/folders/1oY_gj1LGtourOiqguX5z2Y9BFz9aIcfQ', booklet: 'https://drive.google.com/file/d/1FmyZm9q83YfzK7wpVKPPiVP2R1fJ0ysM/view?usp=sharing', audio: 'https://drive.google.com/file/d/1FGqsq70icv2fOrL7FA6ekQCdwORCFo9V/view?usp=sharing' },
+            '4': { path: 'https://drive.google.com/drive/folders/1QGCG-hZYJ-QompSgoGLhOrERDeqXeMPg', booklet: 'https://drive.google.com/file/d/1cMUD0g5XnLF4wLS1wyS0SV6lRth9lwbD/view?usp=sharing', audio: 'https://drive.google.com/file/d/1FGqsq70icv2fOrL7FA6ekQCdwORCFo9V/view?usp=sharing' }
+        }
+    };
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- CONSTANTS & CONFIG ---
+        const lessonStatuses = {
+            pending: { text: 'غير منجزة', class: 'pending', next: 'incomplete' },
+            incomplete: { text: 'غير مكتملة', class: 'incomplete', next: 'done' },
+            done: { text: 'منجزة', class: 'done', next: 'pending' }
+        };
+
+        // --- DOM ELEMENTS ---
+        const settingsContainer = document.getElementById('teacher-settings-container');
+        const settingsContent = settingsContainer.querySelector('.settings-content');
+        const toggleSettingsBtns = document.querySelectorAll('.settings-toggle-btn');
+        const instructionsModal = document.getElementById('instructions-modal');
+        const openInstructionsBtn = document.querySelector('.instructions-btn');
+        const journalModal = document.getElementById('journal-modal');
+        const openJournalBtn = document.getElementById('journal-btn');
+        const noteModal = document.getElementById('note-modal');
+        const saveNoteBtn = document.getElementById('save-note-btn');
+        const floatingBar = document.getElementById('floating-bar');
+
+        // --- UTILS ---
+        const getDb = (key) => JSON.parse(localStorage.getItem(key) || '{}');
+        const setDb = (key, data) => localStorage.setItem(key, JSON.stringify(data));
+        const showToast = (message) => {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        };
+        const getTodayDate = () => new Date().toISOString().slice(0, 10);
+
+        // --- UI Initialization ---
+        const mainContentHTML = `
+            <div class="control-group">
+                <div><label for="class-select">اختر القسم:</label><select id="class-select"></select></div>
+                <div><label for="week-select">اختر الأسبوع:</label><select id="week-select"></select></div>
+                <div><label for="session-select">اختر الحصة:</label><select id="session-select"></select></div>
+            </div>
+            <div id="content-display" style="margin-top: 20px;"></div>`;
+        
+        // --- TABS LOGIC ---
+        const setupTabs = (container) => {
+            container.addEventListener('click', e => {
+                if (e.target.matches('.tab-btn')) {
+                    const targetId = e.target.dataset.tabTarget;
+                    container.querySelectorAll('.tabs-nav .tab-btn').forEach(btn => btn.classList.remove('active'));
+                    container.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                    e.target.classList.add('active');
+                    container.querySelector(targetId)?.classList.add('active');
+                }
+            });
+        };
+        
+        // --- SETTINGS SETUP ---
+        const setupTeacherSettings = () => {
+            const nav = settingsContainer.querySelector('#settings-tabs-nav');
+            const content = settingsContainer.querySelector('#settings-tabs-content');
+            nav.innerHTML = ''; content.innerHTML = '';
+
+            Object.entries(data).forEach(([levelId, levelData], index) => {
+                const isActive = index === 0;
+                nav.innerHTML += `<button class="tab-btn ${isActive ? 'active' : ''}" data-tab-target="#level-tab-${levelId}">${levelData.name}</button>`;
+                
+                let classCheckboxes = Array.from({length: 16}, (_, i) => {
+                    const classId = `${levelId}-${i+1}`;
+                    const className = `${levelData.name.split(' ')[0]} ${i+1}`;
+                    return `<div class="class-checkbox-item"><input type="checkbox" id="${classId}" value="${classId}" data-class-name="${className}" data-level-id="${levelId}"><label for="${classId}">${className}</label></div>`;
+                }).join('');
+
+                content.innerHTML += `
+                    <div id="level-tab-${levelId}" class="tab-content ${isActive ? 'active' : ''}">
+                        <h3 class="section-title">الخطوة 1: تحديد الأقسام المسندة</h3>
+                        <div class="class-selection-grid" data-level-id="${levelId}">${classCheckboxes}</div>
+                        <h3 class="section-title">الخطوة 2: تخصيص اللبنة لكل قسم</h3>
+                        <div class="responsive-wrapper"><div class="assignments-container" id="assignments-container-${levelId}"></div></div>
+                    </div>`;
+            });
+
+            content.addEventListener('change', e => {
+                if(e.target.matches('.class-selection-grid input[type="checkbox"]')) {
+                    updateAssignmentColumns(e.target);
+                }
+            });
+        };
+
+        const updateAssignmentColumns = (checkbox) => {
+            const { value: classId, dataset: { levelId, className } } = checkbox;
+            const container = document.getElementById(`assignments-container-${levelId}`);
+            if (checkbox.checked) {
+                if (container.querySelector(`div[data-class-id="${classId}"]`)) return;
+                const savedSettings = getDb('teacherSettings')[classId] || {};
+                const unitOptions = data[levelId].units.map((unit, i) => `<option value="${i+1}" ${(i+1) == savedSettings.unitId ? 'selected' : ''}>${unit}</option>`).join('');
+                const column = document.createElement('div');
+                column.className = 'assignment-column';
+                column.dataset.classId = classId;
+                column.innerHTML = `<h5>${className}</h5><select class="unit-select"><option value="">-- اختر اللبنة --</option>${unitOptions}</select>`;
+                container.appendChild(column);
+            } else {
+                const columnToRemove = container.querySelector(`div[data-class-id="${classId}"]`);
+                if (columnToRemove) columnToRemove.remove();
+            }
+        };
+
+        const saveTeacherSettings = () => {
+            let settings = getDb('teacherSettings');
+            document.querySelectorAll('.assignment-column').forEach(column => {
+                const { classId } = column.dataset;
+                const [levelId, classNum] = classId.split('-');
+                const unitId = column.querySelector('.unit-select').value;
+                if (unitId) {
+                    settings[classId] = { unitId, levelId, className: `${data[levelId].name.split(' ')[0]} ${classNum}` };
+                } else {
+                    delete settings[classId];
+                }
+            });
+            setDb('teacherSettings', settings);
+            showToast('تم حفظ الإعدادات بنجاح!');
+            updateUIAfterSettingsChange();
+        };
+
+        const loadTeacherSettings = () => {
+            const settings = getDb('teacherSettings');
+            if (Object.keys(settings).length === 0) return;
+            Object.keys(settings).forEach(classId => {
+                const checkbox = document.getElementById(classId);
+                if (checkbox) {
+                    checkbox.checked = true;
+                    updateAssignmentColumns(checkbox);
+                }
+            });
+        };
+        
+        const updateUIAfterSettingsChange = () => {
+            const settings = getDb('teacherSettings');
+            const postSettingsMessage = document.getElementById('post-settings-message');
+            const mainContentContainer = document.getElementById('main-content-container');
+            if (Object.keys(settings).length > 0) {
+                postSettingsMessage.innerHTML = `<p>تهانينا! الآن صار بإمكانك الوصول إلى المحتوى المناسب لأقسامك بسهولة.</p>`;
+                postSettingsMessage.classList.remove('hidden');
+                mainContentContainer.innerHTML = mainContentHTML;
+                mainContentContainer.classList.remove('hidden');
+                populateMainClassSelector();
+                addDynamicEventListeners();
+                loadLastView(); // Load last view after UI is ready
+            } else {
+                postSettingsMessage.classList.add('hidden');
+                mainContentContainer.classList.add('hidden');
+                floatingBar.classList.remove('visible');
+            }
+        };
+
+        // --- MAIN CONTENT & FILTERS ---
+        const populateMainClassSelector = () => {
+            const classSelect = document.getElementById('class-select');
+            const settings = getDb('teacherSettings');
+            classSelect.innerHTML = '<option value="">-- اختر القسم --</option>';
+            if (Object.keys(settings).length === 0) {
+                 classSelect.innerHTML = '<option>حدد الأقسام في الإعدادات أولا</option>'; return;
+            }
+            Object.entries(settings).forEach(([classId, classData]) => {
+                classSelect.innerHTML += `<option value="${classId}">${classData.className}</option>`;
+            });
+        };
+        
+        const updateFilterOptions = () => {
+            const classSelect = document.getElementById('class-select');
+            const weekSelect = document.getElementById('week-select');
+            const sessionSelect = document.getElementById('session-select');
+
+            const classId = classSelect.value;
+            weekSelect.innerHTML = '<option value="">-- كل الأسابيع --</option>';
+            sessionSelect.innerHTML = '<option value="">-- كل الحصص --</option>';
+            if(!classId) {
+                floatingBar.classList.remove('visible');
+                return;
+            };
+            const { levelId, unitId } = getDb('teacherSettings')[classId];
+            const pathData = data[levelId]?.paths[unitId];
+            if(pathData){
+                pathData.weeks.forEach((week, i) => weekSelect.innerHTML += `<option value="${i}">${week.name}</option>`);
+                for(let i=1; i<=4; i++) sessionSelect.innerHTML += `<option value="${i}">الحصة ${i}</option>`;
+            }
+            updateFloatingBar();
+        };
+
+        const displayContent = () => {
+            const contentDisplay = document.getElementById('content-display');
+            const classId = document.getElementById('class-select').value;
+            const weekIndex = document.getElementById('week-select').value;
+            const sessionIndex = document.getElementById('session-select').value;
+
+            saveLastView(); // Save current view
+            contentDisplay.innerHTML = ''; if (!classId) return;
+            const { levelId, unitId } = getDb('teacherSettings')[classId];
+            const pathData = data[levelId]?.paths[unitId]; if (!pathData) { return; }
+            
+            let html = '<div class="week-grid">';
+            const weeksToDisplay = weekIndex !== "" ? [pathData.weeks[weekIndex]] : pathData.weeks;
+
+            weeksToDisplay.forEach((week, wIdx) => {
+                const currentWeekIndex = weekIndex !== "" ? weekIndex : wIdx;
+                if (!week) return;
+
+                let sessionsHTML = '';
+                const sessionsToDisplay = sessionIndex !== "" ? [week.sessions[sessionIndex - 1]] : week.sessions;
+                
+                sessionsToDisplay.forEach((session, sIdx) => {
+                    if (!session) return;
+                    const currentSessionIndex = sessionIndex !== "" ? sessionIndex - 1 : sIdx;
+                    
+                    const lessonId = `${classId}-${currentWeekIndex}-${currentSessionIndex}`;
+                    const lessonData = getDb('lessonTracker')[lessonId] || {};
+                    const statusKey = lessonData.status || 'pending';
+                    const status = lessonStatuses[statusKey];
+                    const completionDate = lessonData.date || '';
+
+                    let dateInputHTML = '';
+                    if (statusKey === 'done') {
+                        dateInputHTML = `
+                        <div class="completion-date-container">
+                            <label for="date-${lessonId}" style="margin:0;">بتاريخ:</label>
+                            <input type="date" class="completion-date" id="date-${lessonId}" data-lesson-id="${lessonId}" value="${completionDate}">
+                        </div>`;
+                    }
+                    
+                    sessionsHTML += `
+                        <div class="session-card ${status.class}">
+                            <div class="session-card-header">
+                                <span>الحصة ${currentSessionIndex + 1}</span>
+                                <span class="status-toggle ${status.class}" data-lesson-id="${lessonId}">${status.text}</span>
+                                ${dateInputHTML}
+                            </div>
+                            <div class="lesson-content">${session}</div>
+                        </div>`;
+                });
+
+                if (sessionsHTML) {
+                    html += `<div class="week-card">
+                                <div class="week-card-header">${week.name}</div>
+                                <div class="session-grid">${sessionsHTML}</div>
+                             </div>`;
+                }
+            });
+            contentDisplay.innerHTML = html + '</div>';
+        };
+
+        const handleStatusToggle = (target) => {
+            const { lessonId } = target.dataset;
+            const tracker = getDb('lessonTracker');
+            tracker[lessonId] = tracker[lessonId] || {};
+            const currentStatusKey = tracker[lessonId].status || 'pending';
+            const newStatusKey = lessonStatuses[currentStatusKey].next;
+            
+            tracker[lessonId].status = newStatusKey;
+            if(newStatusKey === 'done' && !tracker[lessonId].date){
+                tracker[lessonId].date = getTodayDate();
+            }
+            setDb('lessonTracker', tracker);
+            displayContent();
+        };
+
+        const saveCompletionDate = (input) => {
+            const { lessonId } = input.dataset;
+            const tracker = getDb('lessonTracker');
+            if (tracker[lessonId]) {
+                tracker[lessonId].date = input.value;
+                setDb('lessonTracker', tracker);
+                showToast('تم حفظ تاريخ الإنجاز.');
+            }
+        };
+
+        // --- FLOATING BAR ---
+        const updateFloatingBar = () => {
+            const classId = document.getElementById('class-select').value;
+            const contentDiv = document.getElementById('floating-bar-content');
+            
+            if (!classId) {
+                floatingBar.classList.remove('visible');
+                return;
+            }
+
+            const settings = getDb('teacherSettings');
+            const { className, levelId, unitId } = settings[classId];
+            const pathName = data[levelId]?.paths[unitId]?.name || '';
+            const unitName = data[levelId]?.units[unitId - 1] || '';
+            const links = resourceLinks[levelId]?.[unitId];
+
+            if (!links) {
+                contentDiv.innerHTML = `<p>لا توجد روابط لهذا المسار.</p>`;
+                floatingBar.classList.add('visible');
+                return;
+            }
+            
+            contentDiv.innerHTML = `
+                <h6>${className}</h6>
+                <p>${pathName} - ${unitName}</p>
+                <div class="floating-bar-links">
+                    <a href="${links.path}" target="_blank" title="معاينة المسار">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M5 11.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0-2a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0-2a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0-2a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z"/></svg>
+                        <span>المسار</span>
+                    </a>
+                    <a href="${links.booklet}" target="_blank" title="معاينة الكراسة">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
+                        <span>الكراسة</span>
+                    </a>
+                    <a href="${links.audio}" target="_blank" title="النصوص الاستماعية">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 3a5 5 0 0 0-5 5v1h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V8a6 6 0 1 1 12 0v5a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1V8a5 5 0 0 0-5-5z"/></svg>
+                        <span>الاستماع</span>
+                    </a>
+                </div>`;
+            floatingBar.classList.add('visible');
+        };
+
+        // --- JOURNAL / TEXTBOOK LOGIC ---
+        const renderJournal = () => {
+            const tableBody = document.getElementById('journal-table-body');
+            const tracker = getDb('lessonTracker');
+            const settings = getDb('teacherSettings');
+            tableBody.innerHTML = '';
+            
+            const doneLessons = Object.entries(tracker)
+                .filter(([, lessonData]) => lessonData.status === 'done')
+                .map(([lessonId, lessonData]) => ({ lessonId, ...lessonData }));
+
+            doneLessons.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+
+            doneLessons.forEach(({lessonId, date, note}) => {
+                const parts = lessonId.split('-');
+                if (parts.length < 4) return;
+                
+                const classId = `${parts[0]}-${parts[1]}`;
+                const weekIdx = parts[2];
+                const sessionIdx = parts[3];
+
+                const classInfo = settings[classId];
+                if (!classInfo) return; 
+
+                const pathData = data[classInfo.levelId]?.paths[classInfo.unitId];
+                if (!pathData) return;
+
+                const sessionContent = pathData.weeks[weekIdx]?.sessions[sessionIdx] || 'درس غير محدد';
+                const noteText = note || '';
+
+                const row = `
+                    <tr>
+                        <td>${classInfo.className}</td>
+                        <td class="lesson-topic-cell">
+                            <div class="lesson-title">${sessionContent}</div>
+                            <div class="lesson-meta">
+                                <strong>المسار:</strong> <span class="meta-value">${classInfo.unitId}</span> | 
+                                <strong>اللبنة:</strong> <span class="meta-value">${classInfo.unitId}</span> | 
+                                <strong>الأسبوع:</strong> <span class="meta-value">${parseInt(weekIdx) + 1}</span> | 
+                                <strong>الحصة:</strong> <span class="meta-value">${parseInt(sessionIdx) + 1}</span>
+                            </div>
+                        </td>
+                        <td>${date || 'غير محدد'}</td>
+                        <td>
+                            <div class="note-text">${noteText}</div>
+                            <button class="edit-note-btn" data-lesson-id="${lessonId}" title="إضافة/تعديل ملاحظة">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/></svg>
+                            </button>
+                        </td>
+                    </tr>`;
+                tableBody.innerHTML += row;
+            });
+        };
+        
+        const openNoteModal = (lessonId) => {
+            const tracker = getDb('lessonTracker');
+            const note = tracker[lessonId]?.note || '';
+            document.getElementById('note-textarea').value = note;
+            saveNoteBtn.dataset.lessonId = lessonId;
+            noteModal.classList.add('show');
+        };
+
+        const saveNote = () => {
+            const { lessonId } = saveNoteBtn.dataset;
+            if (!lessonId) return;
+            const tracker = getDb('lessonTracker');
+            tracker[lessonId] = tracker[lessonId] || {};
+            tracker[lessonId].note = document.getElementById('note-textarea').value;
+            setDb('lessonTracker', tracker);
+            noteModal.classList.remove('show');
+            showToast('تم حفظ الملاحظة.');
+            renderJournal();
+        };
+
+        // --- SESSION PERSISTENCE ---
+        const saveLastView = () => {
+            const classId = document.getElementById('class-select')?.value;
+            const weekIndex = document.getElementById('week-select')?.value;
+            const sessionIndex = document.getElementById('session-select')?.value;
+            if (classId) {
+                setDb('lastView', { classId, weekIndex, sessionIndex });
+            }
+        };
+
+        const loadLastView = () => {
+            const lastView = getDb('lastView');
+            const classSelect = document.getElementById('class-select');
+            if (lastView.classId && classSelect) {
+                classSelect.value = lastView.classId;
+                if (classSelect.value === lastView.classId) { 
+                    updateFilterOptions();
+                    document.getElementById('week-select').value = lastView.weekIndex;
+                    document.getElementById('session-select').value = lastView.sessionIndex;
+                    displayContent();
+                }
+            }
+        };
+
+        // --- EVENT LISTENERS ---
+        const addDynamicEventListeners = () => {
+            const mainContentContainer = document.getElementById('main-content-container');
+            if (!mainContentContainer) return;
+
+            mainContentContainer.addEventListener('click', e => {
+                if (e.target.classList.contains('status-toggle')) {
+                    handleStatusToggle(e.target);
+                }
+            });
+
+            mainContentContainer.addEventListener('change', e => {
+                if (e.target.classList.contains('completion-date')) {
+                    saveCompletionDate(e.target);
+                } else if (e.target.matches('#class-select')) {
+                    updateFilterOptions(); displayContent();
+                } else if (e.target.matches('#week-select, #session-select')) {
+                    displayContent();
+                }
+            });
+        };
+
+        toggleSettingsBtns.forEach(btn => btn.addEventListener('click', () => {
+            const isHidden = settingsContent.classList.toggle('hidden');
+            toggleSettingsBtns.forEach(b => {
+                b.querySelector('.btn-text').textContent = isHidden ? 'إظهار الإعدادات' : 'إخفاء الإعدادات';
+                b.querySelector('svg').style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+            });
+        }));
+
+        document.getElementById('save-teacher-settings').addEventListener('click', saveTeacherSettings);
+        
+        openInstructionsBtn.addEventListener('click', () => instructionsModal.classList.add('show'));
+        openJournalBtn.addEventListener('click', () => { renderJournal(); journalModal.classList.add('show'); });
+        
+        [instructionsModal, journalModal, noteModal].forEach(modal => {
+            modal.addEventListener('click', e => {
+                if (e.target.classList.contains('modal') || e.target.classList.contains('close-btn')) {
+                    modal.classList.remove('show');
+                }
+            });
+        });
+
+        document.getElementById('journal-table-body').addEventListener('click', e => {
+            const btn = e.target.closest('.edit-note-btn');
+            if (btn) {
+                openNoteModal(btn.dataset.lessonId);
+            }
+        });
+
+        saveNoteBtn.addEventListener('click', saveNote);
+
+        document.getElementById('print-journal-btn').addEventListener('click', () => window.print());
+
+        document.getElementById('toggle-floating-bar').addEventListener('click', (e) => {
+            const bar = e.target.parentElement;
+            const isCollapsed = bar.classList.toggle('collapsed');
+            if (isCollapsed) {
+                bar.style.transform = `translateX(calc(-100% + ${e.target.offsetWidth}px))`;
+                e.target.textContent = 'إظهار';
+            } else {
+                bar.style.transform = 'translateX(0)';
+                e.target.textContent = 'إخفاء';
+            }
+        });
+
+        // --- INITIALIZATION ---
+        setupTeacherSettings();
+        setupTabs(settingsContainer.querySelector('.tabs-container'));
+        loadTeacherSettings();
+        updateUIAfterSettingsChange();
+    });
+
+
+// --- PWA Service Worker Registration ---
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').then(registration => {
+      console.log('ServiceWorker registration successful with scope: ', registration.scope);
+    }, err => {
+      console.log('ServiceWorker registration failed: ', err);
+    });
+  });
+}
+
+    </script>
+</body>
+</html>
