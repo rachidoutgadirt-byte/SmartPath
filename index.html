@@ -148,6 +148,12 @@
         #content-display .completion-date-container { display: inline-flex; flex-shrink: 0; align-items: center; white-space: nowrap; }
 
         .class-selection-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem; }
+        /* أضف هذا الكود للتحكم في عرض الأقسام بالشاشات الصغيرة */
+@media (max-width: 576px) {
+    .class-selection-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
         .assignments-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
         .assignment-column { padding: 0; }
         .assignment-column .card-header { padding: 0.75rem 1rem; background-color: var(--background-color-light); }
